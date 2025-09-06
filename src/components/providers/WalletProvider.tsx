@@ -6,8 +6,6 @@ import {
   useWallet 
 } from '@aptos-labs/wallet-adapter-react';
 
-// Import specific wallet adapters
-import { PetraWallet } from 'petra-plugin-wallet-adapter';
 import { Network } from "@aptos-labs/ts-sdk";
 
 // Add other wallets as needed
@@ -18,8 +16,8 @@ import { Network } from "@aptos-labs/ts-sdk";
 import { useAppStore } from '@/store/useAppStore';
 
 // Configure available wallets
-const wallets = [new PetraWallet(),
-  // Add other wallets here when available
+const wallets = [
+  // Wallets are auto-detected by the adapter
   // new MartianWallet(),
   // new RiseWallet(),
   // new FewchaWallet(),
@@ -34,7 +32,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
   return (
     <AptosWalletAdapterProvider
-      // wallets={wallets}
+      wallets={wallets}
       autoConnect={true}
       dappConfig={{
         network: Network.testnet // or 'testnet' for testing
