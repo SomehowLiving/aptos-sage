@@ -1,3 +1,4 @@
+import { Sandbox } from '@e2b/sdk';
 import { SandboxSimulation, TokenParameters, PoolParameters, VaultParameters } from '@/types';
 import { openRouterService } from './openrouter';
 
@@ -62,7 +63,7 @@ export class SandboxService {
     }
   }
 
-  // Test the generated code
+  // Test the generated code using an E2B sandbox
   async testCode(simulationId: string): Promise<SandboxSimulation> {
     const simulation = this.simulations.get(simulationId);
     if (!simulation) {
@@ -74,92 +75,78 @@ export class SandboxService {
     }
 
     simulation.status = 'compiling';
+    this.simulations.set(simulationId, simulation);
 
+    let sandbox: Sandbox | undefined;
     try {
-      // Simulate compilation and testing
-      const testResult = await this.simulateCompilation(simulation.code, simulation.type);
+      if (!process.env.E2B_API_KEY) {
+        throw new Error('E2B_API_KEY is not set in environment variables.');
+      }
+
+      sandbox = await Sandbox.create({ 
+        template: 'base',
+        apiKey: process.env.E2B_API_KEY,
+      });
+
+      // Install Aptos CLI
+      const installProc = await sandbox.process.start('curl -fsSL "https://aptos.dev/scripts/install_cli.py" | python3');
+      await installProc.wait;
       
+      const aptosCliPath = '/root/.local/bin/aptos';
+
+      // Create Move.toml for the project
+      const moveTomlContent = `
+[package]
+name = "SandboxProject"
+version = "1.0.0"
+authors = []
+
+[addresses]
+ProjectAddress = "0x1"
+`;
+      await sandbox.filesystem.write('/home/user/Move.toml', moveTomlContent);
+
+      // Create sources directory and write the generated code
+      await sandbox.filesystem.makeDir('/home/user/sources');
+      await sandbox.filesystem.write('/home/user/sources/main.move', simulation.code);
+      
+      // Compile the code inside the sandbox
+      const compileProc = await sandbox.process.start(
+        `${aptosCliPath} move compile`,
+        { cwd: '/home/user' }
+      );
+      const output = await compileProc.wait;
+
+      const success = output.exitCode === 0;
+      const errors = !success ? output.stderr.split('\n').filter(line => line.trim() !== '') : [];
+      const warnings = success ? output.stdout.split('\n').filter(line => line.trim() !== '' && line.toLowerCase().includes('warning')) : [];
+
       // Get AI analysis of the code
       const aiAnalysis = await openRouterService.analyzeCode(simulation.code, simulation.type);
 
       simulation.result = {
-        success: testResult.success,
-        errors: testResult.errors,
-        warnings: testResult.warnings,
-        gasEstimate: testResult.gasEstimate,
+        success,
+        errors,
+        warnings,
+        gasEstimate: 'Compilation check only',
         aiAnalysis,
       };
+      simulation.status = success ? 'success' : 'error';
 
-      simulation.status = testResult.success ? 'success' : 'error';
     } catch (error) {
       simulation.status = 'error';
       simulation.result = {
         success: false,
-        errors: [error instanceof Error ? error.message : 'Testing failed'],
+        errors: [error instanceof Error ? error.message : 'An unknown error occurred during sandbox execution.'],
       };
+    } finally {
+      if (sandbox) {
+        await sandbox.close();
+      }
     }
-
+    
+    this.simulations.set(simulationId, simulation);
     return simulation;
-  }
-
-  // Simulate compilation (mock implementation)
-  private async simulateCompilation(code: string, type: string) {
-    // In a real implementation, this would use Aptos CLI or Move compiler
-    // For now, we'll simulate based on common patterns
-    
-    const errors: string[] = [];
-    const warnings: string[] = [];
-    
-    // Basic syntax checks
-    if (!code.includes('module')) {
-      errors.push('Missing module declaration');
-    }
-    
-    if (!code.includes('public entry fun')) {
-      errors.push('Missing public entry function');
-    }
-    
-    if (type === 'token' && !code.includes('fungible_asset')) {
-      errors.push('Token code should use fungible_asset framework');
-    }
-    
-    if (type === 'pool' && !code.includes('liquidity')) {
-      errors.push('Pool code should include liquidity management');
-    }
-    
-    if (type === 'vault' && !code.includes('yield')) {
-      errors.push('Vault code should include yield strategy');
-    }
-    
-    // Check for common security issues
-    if (code.includes('assert!') && !code.includes('error::')) {
-      warnings.push('Consider using proper error codes with assertions');
-    }
-    
-    if (!code.includes('signer::address_of')) {
-      warnings.push('Consider validating signer address');
-    }
-    
-    // Estimate gas (mock)
-    const gasEstimate = this.estimateGas(code, type);
-    
-    return {
-      success: errors.length === 0,
-      errors,
-      warnings,
-      gasEstimate,
-    };
-  }
-
-  // Estimate gas usage (mock implementation)
-  private estimateGas(code: string, type: string): string {
-    // In a real implementation, this would use Aptos gas estimation
-    const baseGas = 1000;
-    const complexityMultiplier = code.length / 1000;
-    const typeMultiplier = type === 'token' ? 1 : type === 'pool' ? 1.5 : 2;
-    
-    const estimatedGas = Math.round(baseGas * complexityMultiplier * typeMultiplier);
-    return estimatedGas.toString();
   }
 
   // Get simulation by ID

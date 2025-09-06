@@ -104,7 +104,7 @@ PARAMETERS PROVIDED:
 - Icon URI: ${parameters.iconUri || 'Not provided'}
 - Project URI: ${parameters.projectUri || 'Not provided'}
 
-Generate the Move code for creating this token.`;
+Generate the Move code for creating this token. The module should be defined under the address named 'ProjectAddress'.`;
 
     const messages: OpenRouterMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -144,7 +144,7 @@ PARAMETERS PROVIDED:
 - Initial Liquidity A: ${parameters.initialLiquidityA}
 - Initial Liquidity B: ${parameters.initialLiquidityB}
 
-Generate the Move code for creating this liquidity pool.`;
+Generate the Move code for creating this liquidity pool. The module should be defined under the address named 'ProjectAddress'.`;
 
     const messages: OpenRouterMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -182,7 +182,7 @@ PARAMETERS PROVIDED:
 - Fee: ${parameters.fee}%
 - Minimum Deposit: ${parameters.minDeposit}
 
-Generate the Move code for creating this yield vault.`;
+Generate the Move code for creating this yield vault. The module should be defined under the address named 'ProjectAddress'.`;
 
     const messages: OpenRouterMessage[] = [
       { role: 'system', content: systemPrompt },

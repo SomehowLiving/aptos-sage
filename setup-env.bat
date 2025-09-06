@@ -97,6 +97,3 @@ echo    - ENVIRONMENT_SETUP.md
 echo.
 echo Happy building! 🚀
 pause
-
-
-
