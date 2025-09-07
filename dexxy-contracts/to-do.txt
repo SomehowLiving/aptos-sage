@@ -1,0 +1,73 @@
+2. Write Smart Contracts
+
+Create modules in sources/:
+
+token.move
+
+liquidity_pool.move
+
+yield_vault.move
+
+Use Aptos Move standards:
+
+fungible_asset
+
+coin
+
+Example token snippet:
+
+module MyToken::Token {
+    use aptos_framework::fungible_asset;
+
+    public fun create_token(account: &signer, name: vector<u8>, symbol: vector<u8>, decimals: u8, supply: u64) {
+        fungible_asset::register(account, name, symbol, decimals);
+        fungible_asset::mint(account, supply);
+    }
+}
+
+3. Deploy to Localnet/Testnet
+
+Start localnet:
+
+aptos node run-local-testnet --with-faucet
+
+
+Compile contracts:
+
+aptos move compile
+
+
+Publish:
+
+aptos move publish --profile default
+
+4. Integrate Wallets
+
+Use wallet-adapter
+ in React:
+
+import { PetraWallet } from "petra-plugin-wallet-adapter";
+import { PontemWallet } from "@pontem/wallet-adapter";
+
+
+Functions: connect, sign tx, submit tx.
+
+Backend: use Aptos SDK (TS/Python) to call deployed contracts.
+
+5. Debug + Test
+
+Check txs on Aptos Explorer.
+
+Write Move unit tests (tests/ folder).
+
+Use CLI to simulate calls before deploying.
+
+✅ So at minimum, you need 3 contracts to demo Phase 1–2:
+
+Token (FA) → users can create tokens.
+
+Liquidity Pool (AMM) → deposit, swap, withdraw.
+
+Yield Vault (Staking) → earn rewards.
+
+Later, you can add Sandbox, Launchpad, and Gamification modules.
