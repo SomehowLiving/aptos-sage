@@ -39,8 +39,7 @@
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4",
     "zustand": "^4.4.7",
-    "aptos": "^1.21.0", 
-    "@mizuwallet-sdk/core": "^0.1.0"
+    "aptos": "^1.21.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
