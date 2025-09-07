@@ -176,15 +176,15 @@ export class AptosContractService {
   }
 
   // Estimate gas for transaction
-  async estimateGas(transaction: any) {
-    try {
-      const gasEstimate = await this.aptos.estimateGasPrice();
-      return gasEstimate;
-    } catch (error) {
-      console.error('Error estimating gas:', error);
-      return null;
-    }
-  }
+  // async estimateGas(transaction: any) {
+  //   try {
+  //     const gasEstimate = await this.aptos.estimateGasPrice();
+  //     return gasEstimate;
+  //   } catch (error) {
+  //     console.error('Error estimating gas:', error);
+  //     return null;
+  //   }
+  // }
 }
 
 export const contractService = new AptosContractService();

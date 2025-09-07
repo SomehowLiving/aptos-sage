@@ -1,3 +1,27 @@
+// 'use client';
+
+// import React from 'react';
+// import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
+// import { Network } from "@aptos-labs/ts-sdk";
+
+// interface WalletProviderProps {
+//   children: React.ReactNode;
+// }
+
+// export function WalletProvider({ children }: WalletProviderProps) {
+//   return (
+//     <AptosWalletAdapterProvider
+//       autoConnect
+//       optInWallets={['Petra']}
+//     >
+//       {children}
+//     </AptosWalletAdapterProvider>
+//   );
+// }
+
+
+
+
 'use client';
 
 import { ReactNode, useEffect } from 'react';
@@ -6,6 +30,8 @@ import {
   useWallet 
 } from '@aptos-labs/wallet-adapter-react';
 
+// Import specific wallet adapters
+import { PetraWallet } from 'petra-plugin-wallet-adapter';
 import { Network } from "@aptos-labs/ts-sdk";
 
 // Add other wallets as needed
@@ -16,8 +42,8 @@ import { Network } from "@aptos-labs/ts-sdk";
 import { useAppStore } from '@/store/useAppStore';
 
 // Configure available wallets
-const wallets = [
-  // Wallets are auto-detected by the adapter
+const wallets = [new PetraWallet(),
+  // Add other wallets here when available
   // new MartianWallet(),
   // new RiseWallet(),
   // new FewchaWallet(),
@@ -32,10 +58,10 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
   return (
     <AptosWalletAdapterProvider
-      wallets={wallets}
+      // wallets={wallets}
       autoConnect={true}
       dappConfig={{
-        network: Network.testnet // or 'testnet' for testing
+        network: Network.TESTNET // or 'testnet' for testing
         // Add your dapp info
         // name: 'Your Dapp Name',
         // url: 'https://yourdapp.com' // optional

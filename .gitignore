@@ -29,7 +29,3 @@ pnpm-debug.log*
 # Misc
 .DS_Store
 Thumbs.db
-
-.env
-
-.env.local

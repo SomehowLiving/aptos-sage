@@ -215,3 +215,6 @@ Before running the application, make sure you have:
 - [ ] `.env.local` file created in the root directory
 
 Once all items are checked, you're ready to run the application!
+
+
+
