@@ -6,14 +6,12 @@ import { openRouterService } from '@/lib/openrouter';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatInput } from './ChatInput';
 import { ChatHeader } from './ChatHeader';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/toaster';
 
 export function ChatInterface() {
   const { 
     currentSession, 
     addMessage, 
-    setCurrentSession, 
     wallet,
     setLoading,
     setError 
@@ -35,7 +33,6 @@ export function ChatInterface() {
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || isTyping) return;
 
-    // Add user message
     const userMessage = {
       id: `msg_${Date.now()}`,
       role: 'user' as const,
@@ -49,16 +46,13 @@ export function ChatInterface() {
     setLoading(true);
 
     try {
-      // Get conversation history for context
       const conversationHistory = currentSession?.messages.map(msg => ({
         role: msg.role,
         content: msg.content,
       })) || [];
 
-      // Get AI response
       const aiResponse = await openRouterService.chatWithAssistant(message, conversationHistory);
 
-      // Add AI response
       const assistantMessage = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant' as const,
@@ -101,7 +95,7 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-screen bg-white">
       {/* Chat Header */}
       <ChatHeader 
         walletConnected={wallet.connected}
@@ -109,9 +103,10 @@ export function ChatInterface() {
       />
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-28"> 
         {currentSession?.messages.length === 0 ? (
           <div className="h-full flex items-center justify-center">
+            {/* Welcome screen */}
             <div className="text-center max-w-md mx-auto px-6">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-2xl font-bold">AA</span>
@@ -165,10 +160,13 @@ export function ChatInterface() {
             isTyping={isTyping}
           />
         )}
+
+        {/* Scroll anchor */}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-gray-200 p-4">
+      {/* Floating Input Area */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <ChatInput
           value={inputValue}
           onChange={setInputValue}
@@ -177,9 +175,6 @@ export function ChatInterface() {
           placeholder={wallet.connected ? "Ask me anything about DeFi..." : "Connect your wallet to start chatting"}
         />
       </div>
-
-      {/* Scroll anchor */}
-      <div ref={messagesEndRef} />
     </div>
   );
 }
