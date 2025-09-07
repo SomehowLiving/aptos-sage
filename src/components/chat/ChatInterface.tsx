@@ -109,7 +109,7 @@ export function ChatInterface() {
       />
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         {currentSession?.messages.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center max-w-md mx-auto px-6">
